@@ -1,11 +1,2 @@
-/* App.css – component-level overrides */
-
-/* Responsive analysis grid */
-@media (max-width: 640px) {
-  .analysis-grid {
-    grid-template-columns: 1fr !important;
-  }
-}
-
-/* Ensure framer-motion circle stroke uses currentColor properly */
-.gauge-circle { transition: stroke .3s; }
+/* App-level overrides — all major styles live in index.css */
+#root { isolation: isolate; }

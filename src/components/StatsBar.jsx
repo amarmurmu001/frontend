@@ -1,50 +1,40 @@
 import React from 'react';
-import { ShieldAlert, ShieldCheck, Zap, SmilePlus, TrendingUp } from 'lucide-react';
+import { TrendingUp, ShieldAlert, ShieldCheck, Brain, Zap } from 'lucide-react';
 
-const StatCard = ({ icon, label, value, accent }) => (
-  <div style={{
-    background: 'var(--surface)',
-    border: '1px solid var(--border)',
-    borderRadius: 'var(--radius-sm)',
-    padding: '.8rem 1.1rem',
-    display: 'flex', alignItems: 'center', gap: '.8rem',
-    flex: '1 1 130px', minWidth: 0,
-    transition: 'box-shadow .2s',
-  }}
-    onMouseEnter={e => e.currentTarget.style.boxShadow = 'var(--shadow-md)'}
-    onMouseLeave={e => e.currentTarget.style.boxShadow = ''}
-  >
+const STATS = [
+  { key: 'totalScans',      label: 'Total Scans',  icon: TrendingUp,  accent: '#6366f1', suffix: '' },
+  { key: 'toxicDetected',   label: 'Toxic Found',  icon: ShieldAlert, accent: '#f87171', suffix: '' },
+  { key: 'safeScans',       label: 'Safe Content', icon: ShieldCheck, accent: '#34d399', suffix: '' },
+  { key: 'sarcasmDetected', label: 'Sarcasm',      icon: Brain,       accent: '#a78bfa', suffix: '' },
+];
+
+const StatPill = ({ icon: Icon, label, value, accent }) => (
+  <div className="stat-pill">
     <div style={{
-      background: accent + '22', borderRadius: '8px',
-      padding: '.45rem', display: 'flex', flexShrink: 0,
+      width: 38, height: 38, borderRadius: 10, flexShrink: 0,
+      background: accent + '18',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      border: `1px solid ${accent}30`,
     }}>
-      {React.cloneElement(icon, { size: 18, color: accent })}
+      <Icon size={17} color={accent} />
     </div>
     <div style={{ minWidth: 0 }}>
-      <div style={{ fontSize: '1.3rem', fontWeight: 800, color: 'var(--text)', lineHeight: 1 }}>{value}</div>
-      <div style={{ fontSize: '.72rem', color: 'var(--text2)', marginTop: '.15rem', fontWeight: 500 }}>{label}</div>
+      <div style={{ fontSize: '1.4rem', fontWeight: 800, color: 'var(--text)', lineHeight: 1, letterSpacing: '-0.02em' }}>
+        {(value ?? 0).toLocaleString()}
+      </div>
+      <div style={{ fontSize: '0.7rem', color: 'var(--text3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 2 }}>
+        {label}
+      </div>
     </div>
   </div>
 );
 
-const StatsBar = ({ stats }) => {
-  const {
-    total = 0, toxic = 0, safe = 0,
-    sarcastic = 0, critical = 0
-  } = stats;
-
-  return (
-    <div style={{
-      display: 'flex', gap: '.75rem', flexWrap: 'wrap',
-      marginBottom: '.5rem',
-    }}>
-      <StatCard icon={<TrendingUp />}  label="Total Scans"  value={total}    accent="#6366f1" />
-      <StatCard icon={<ShieldAlert />} label="Toxic"        value={toxic}    accent="#ef4444" />
-      <StatCard icon={<ShieldCheck />} label="Safe"         value={safe}     accent="#10b981" />
-      <StatCard icon={<SmilePlus />}   label="Sarcasm"      value={sarcastic} accent="#9333ea" />
-      <StatCard icon={<Zap />}         label="Critical"     value={critical} accent="#f59e0b" />
-    </div>
-  );
-};
+const StatsBar = ({ stats }) => (
+  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: '1.5rem' }}>
+    {STATS.map(s => (
+      <StatPill key={s.key} icon={s.icon} label={s.label} value={stats?.[s.key]} accent={s.accent} />
+    ))}
+  </div>
+);
 
 export default StatsBar;

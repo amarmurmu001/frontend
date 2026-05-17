@@ -1,70 +1,82 @@
 import React from 'react';
-import { motion } from 'framer-motion';
 
 const GaugeChart = ({ confidence, label }) => {
   const isToxic = label === 'Toxic';
+  const score   = isToxic ? confidence : Math.max(0, 100 - confidence);
+  const radius  = 54;
+  const circ    = 2 * Math.PI * radius;
+  const offset  = circ - (score / 100) * circ;
 
-  const radius        = 60;
-  const circumference = 2 * Math.PI * radius;
-  const toxicityScore = isToxic ? confidence : Math.max(0, 100 - confidence);
-  const strokeDashoffset = circumference - (toxicityScore / 100) * circumference;
+  const color =
+    score > 75 ? '#f87171' :
+    score > 50 ? '#fbbf24' :
+    '#34d399';
 
-  const strokeColor =
-    toxicityScore > 75 ? 'var(--danger)' :
-    toxicityScore > 50 ? 'var(--warn)'   :
-    'var(--success)';
-
-  const textColor =
-    toxicityScore > 75 ? 'var(--danger)' :
-    toxicityScore > 50 ? 'var(--warn)'   :
-    'var(--success)';
+  const glowColor =
+    score > 75 ? 'rgba(248,113,113,0.4)' :
+    score > 50 ? 'rgba(251,191,36,0.4)'  :
+    'rgba(52,211,153,0.4)';
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '1rem 0' }}>
-      <div style={{ position: 'relative', width: '140px', height: '140px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <svg style={{ width: '100%', height: '100%', transform: 'rotate(-90deg)' }} viewBox="0 0 140 140">
+    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', padding: '0.5rem 0' }}>
+      <div style={{ position: 'relative', width: 130, height: 130 }}>
+        <svg width="130" height="130" style={{ transform: 'rotate(-90deg)' }}>
+          <defs>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="3" result="coloredBlur" />
+              <feMerge>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+            {/* Gradient stroke */}
+            <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" stopColor={color} stopOpacity="0.6" />
+              <stop offset="100%" stopColor={color} stopOpacity="1" />
+            </linearGradient>
+          </defs>
+
           {/* Track */}
-          <circle cx="70" cy="70" r={radius} fill="transparent" stroke="var(--border)" strokeWidth="12" />
-          {/* Animated fill */}
-          <motion.circle
-            cx="70" cy="70" r={radius}
-            fill="transparent"
-            stroke={strokeColor}
-            strokeWidth="12"
-            strokeDasharray={circumference}
-            initial={{ strokeDashoffset: circumference }}
-            animate={{ strokeDashoffset }}
-            transition={{ duration: 1.4, ease: 'easeOut' }}
+          <circle cx="65" cy="65" r={radius}
+            fill="none"
+            stroke="var(--surface3)"
+            strokeWidth="10"
+          />
+
+          {/* Value arc */}
+          <circle cx="65" cy="65" r={radius}
+            fill="none"
+            stroke={`url(#gaugeGrad)`}
+            strokeWidth="10"
+            strokeDasharray={circ}
+            strokeDashoffset={offset}
             strokeLinecap="round"
+            filter="url(#glow)"
+            style={{
+              transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1)',
+              boxShadow: `0 0 20px ${glowColor}`,
+            }}
           />
         </svg>
 
-        {/* Centre label */}
+        {/* Centre */}
         <div style={{
           position: 'absolute', inset: 0,
           display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
         }}>
-          <span style={{ fontSize: '1.6rem', fontWeight: 900, color: textColor, lineHeight: 1 }}>
-            {toxicityScore.toFixed(0)}%
+          <span style={{ fontSize: '1.75rem', fontWeight: 900, color, lineHeight: 1, letterSpacing: '-0.03em' }}>
+            {score.toFixed(0)}%
           </span>
-          <span style={{ fontSize: '.65rem', fontWeight: 600, color: 'var(--text2)', marginTop: '2px', textTransform: 'uppercase', letterSpacing: '.06em' }}>
+          <span style={{ fontSize: '0.62rem', fontWeight: 700, color: 'var(--text3)', marginTop: 3, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
             Toxicity
           </span>
         </div>
       </div>
 
       {/* Label badge */}
-      <div style={{ marginTop: '.75rem' }}>
-        <span style={{
-          display: 'inline-block', padding: '.3rem .9rem',
-          borderRadius: '999px', fontSize: '.8rem', fontWeight: 700,
-          background: isToxic ? 'var(--danger-light)' : 'var(--success-light)',
-          color: isToxic ? 'var(--danger)' : 'var(--success)',
-          border: `1px solid ${isToxic ? 'var(--danger)' : 'var(--success)'}`,
-        }}>
-          {label.toUpperCase()}
-        </span>
-      </div>
+      <span className={`badge ${isToxic ? 'badge-toxic' : 'badge-safe'}`} style={{ marginTop: 8, padding: '4px 14px', fontSize: '0.72rem' }}>
+        {label.toUpperCase()}
+      </span>
     </div>
   );
 };
